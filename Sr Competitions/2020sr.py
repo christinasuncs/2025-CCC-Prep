@@ -33,31 +33,68 @@
 # check if in bounds/ is valid
 # use 2D arr to store neighbours of each cell
 
-# M = int(input())
-# N = int(input())
+M = int(input())
+N = int(input())
+
+# M = 3
+# N = 4
 
 room = []
-# end = M*N
+end = M*N
+visited = [[ False for i in range(N)] for i in range(M)]
 
-# for i in range(M):
-#     temp = input().split()
-#     temp = [int(i) for i in temp]
-#     room.append(temp)
+for i in range(M):
+    temp = input().split()
+    temp = [int(i) for i in temp]
+    room.append(temp)
 
-def findNeighbours(curr):
-    isFactor(curr)
-
-def isFactor(curr):
+# find all factors of curr
+def factor(curr):
     factors = []
     for i in range(1, int(curr**0.5)+1):
         if curr % i == 0:
             factors.append([i, int(curr/i)])
-            factors.append([int(curr/i), i])
+            if i != int(curr/i):
+                factors.append([int(curr/i), i])
     return factors
 
-print(isFactor(8))
-print(findNeighbours(8))
+# find valid coords
+def findValidCoords(curr):
+    factors = factor(curr)
+    validFactors = []
+    for i in range(len(factors)):
+        if factors[i][0] <= M and factors[i][1] <= N:
+            validFactors.append(factors[i])
+    return validFactors
 
-def bfs(adj, s): # s = room[0][0]
+def findNeighbours(curr):
+    factors = findValidCoords(curr)
+    values = []
+    for factor in factors:
+        values.append(room[factor[0]-1][factor[1]-1])
+    return values
+
+def bfs(room, visited): # s = room[0][0]
     q = []
-    visited = [False] * len
+
+    q.append(room[0][0])
+    visited[0][0] = True
+
+    while (len(q) > 0):
+        val = q.pop(0)
+        if val == end:
+            print("yes")
+            return
+        coords = findValidCoords(val)
+
+        for i in range(len(coords)):
+            if not visited[coords[i][0]-1][coords[i][1]-1]:
+                q.append(room[coords[i][0]-1][coords[i][1]-1])
+                visited[coords[i][0]-1][coords[i][1]-1] = True
+    
+    print("no")
+
+bfs(room, visited)
+
+# needs improvement:
+# remove duplicated factors
