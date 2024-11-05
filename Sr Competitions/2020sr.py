@@ -48,53 +48,80 @@ for i in range(M):
     temp = [int(i) for i in temp]
     room.append(temp)
 
-# find all factors of curr
-def factor(curr):
+factorsMemo = {}
+
+# # find all factors of curr
+# def factor(curr):
+#     if curr in factorsMemo:
+#         return factorsMemo[curr]
+
+#     factors = []
+#     for i in range(1, int(curr**0.5)+1):
+#         if curr % i == 0:
+#             factors.append([i, int(curr/i)])
+#             if i != int(curr/i):
+#                 factors.append([int(curr/i), i])
+
+#     factorsMemo[curr] = factors
+#     return factors
+
+# # find valid coords
+# def findValidCoords(curr):
+#     factors = factor(curr)
+#     validFactors = []
+#     for f in factors:
+#         if f[0] <= M and f[1] <= N:
+#             validFactors.append(f)
+#     return validFactors
+
+def factorAndFindValid(curr):
+    if curr in factorsMemo:
+        return factorsMemo[curr]
+
     factors = []
     for i in range(1, int(curr**0.5)+1):
         if curr % i == 0:
-            factors.append([i, int(curr/i)])
-            if i != int(curr/i):
-                factors.append([int(curr/i), i])
+            r1, c1 = i, curr // i
+            if i != curr // i:
+                r2, c2 = curr // i, i
+                if r2 <= M and c2 <= N:
+                    factors.append((r2-1, c2-1))
+
+            if r1 <= M and c1 <= N:
+                factors.append((r1-1, c1-1))
+
+    factorsMemo[curr] = factors
     return factors
 
-# find valid coords
-def findValidCoords(curr):
-    factors = factor(curr)
-    validFactors = []
-    for i in range(len(factors)):
-        if factors[i][0] <= M and factors[i][1] <= N:
-            validFactors.append(factors[i])
-    return validFactors
-
-def findNeighbours(curr):
-    factors = findValidCoords(curr)
-    values = []
-    for factor in factors:
-        values.append(room[factor[0]-1][factor[1]-1])
-    return values
-
-def bfs(room, visited): # s = room[0][0]
+def bfs(room, visited): 
     q = []
 
-    q.append(room[0][0])
+    q.append((0, 0))
     visited[0][0] = True
 
     while (len(q) > 0):
-        val = q.pop(0)
+        r, c = q.pop(0)
+        val = room[r][c]
         if val == end:
             print("yes")
             return
-        coords = findValidCoords(val)
+        coords = factorAndFindValid(val)
 
-        for i in range(len(coords)):
-            if not visited[coords[i][0]-1][coords[i][1]-1]:
-                q.append(room[coords[i][0]-1][coords[i][1]-1])
-                visited[coords[i][0]-1][coords[i][1]-1] = True
+        for coord in coords:
+            new_r, new_c = coord[0], coord[1]
+            if not visited[new_r][new_c]:
+                q.append((new_r, new_c))
+                visited[new_r][new_c] = True
     
     print("no")
 
 bfs(room, visited)
 
-# needs improvement:
+# to improve:
 # remove duplicated factors
+
+# version 2:
+# store factors - memoization = avoid repetition
+# empty dictionary (factorMemo) store factors that have been computed
+
+# 13/15 max score :/ --> need different approach
